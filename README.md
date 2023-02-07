@@ -1,2 +1,2 @@
-# RPCLife
-Rock Paper Scissors Life Game
+# RPSLife
+A simple sim game of rock, paper, sicssors
