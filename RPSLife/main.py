@@ -1,20 +1,33 @@
 import sys
+import argparse
 import pygame
 import random
-import argparse
 from dataclasses import dataclass
 from typing import Optional
 from enum import Enum
 
-frames = 0
-kill_delay = 3
-frame_rate = 15
-winner = None
-image_scale = (30, 30)
-token_spawn_count = 20
-min_speed = -5
-max_speed = 5
+parser = argparse.ArgumentParser(
+    prog="RPSLife", 
+    description="A simple sim game of rock, paper, sicssors. Oh and also lizard and Spock."
+)
+parser.add_argument('-w', '--width', default=800, dest="width", type=int, metavar="WIDTH", help="Width of the game window.")
+parser.add_argument('-v', '--height', default=800, dest="height", type=int, metavar="HEIGHT", help="Height of the game window.")
+parser.add_argument('-f', '--frame_rate', default=15, dest='frame_rate', type=int, metavar="FRAMERATE", help="Game's max frame rate.")
+parser.add_argument('-c', '--spawn_count', default=20, dest="spawn_count", type=int, metavar="SPAWNCOUNT", help="Number of enteies to spawn.")
+parser.add_argument('-m', '--min_speed', default=-5, dest='min_speed', type=int, metavar="MINSPEED", help="Game tokens min move speed.")
+parser.add_argument('-x', '--max_speed', default=5, dest='max_speed', type=int, metavar="MAXSPEED", help="Game tokens max move speed.")
+
+width: int = 800
+height: int = 800
+frames: int = 0
+kill_delay: int = 3
+frame_rate: int = 15
+image_scale: tuple[int, int] = (30, 30)
+token_spawn_count: int = 20
+min_speed: int = -5
+max_speed: int = 5
 scores: dict = {"Scissors": 0, "Paper": 0, "Rock": 0, "Lizard": 0, "Spock": 0}
+winner = None
 
 
 class TokenType(Enum):
@@ -39,7 +52,7 @@ class Token:
     def __init__(self, my_type: TokenType, msg: Optional[str]=None, pos: Optional[list[int, int]] = None, 
                 color: Optional[str] = None, font_size: Optional[int] = None) -> None:
         self.Type: Token.Type = my_type
-        self.Name = self.Type.value['name']
+        self.Name: str = self.Type.value['name']
         self.Image: Token.Image = None
         self.Rect: Token.Rect = None
         self.Position: Token.Position = None
@@ -84,13 +97,14 @@ class Token:
 
 
 def print_msg(msg: str) -> None:
-    global winner
+    global winner, width, height
     winner = Token(TokenType.TEXT, msg=msg, color="crimson", font_size=40)
     winner.Rect = winner.Image.get_rect()
     winner.Position = ((width/2)-(winner.Rect.width/2), (height/2)-(winner.Rect.height/2))
 
 
 def border_check(i: Token) -> None:
+    global width, height
     if i.Position.left < 0 or i.Position.right > width:
         i.Speed[0] = -i.Speed[0]
     if i.Position.top < 20 or i.Position.bottom > height - 20:
@@ -145,14 +159,21 @@ def token_hit(t: Token, tl: list[Token]) -> None:
         print_msg(msg=f"{tl[0].Type.value['name']} WINS !!!")
 
 
-if __name__ == "__main__":
+def main(*args, **kwargs) -> None:
+    global width, height, frames, frame_rate, token_spawn_count, min_speed, max_speed, scores, winner, kill_delay
+    width = kwargs['width']
+    height = kwargs['height']
+    frame_rate = kwargs['frame_rate']
+    token_spawn_count = kwargs['spawn_count']
+    min_speed = kwargs['min_speed']
+    max_speed = kwargs['max_speed']
+
     pygame.init()
+    pygame.font.init()
+    clock: pygame.time.Clock = pygame.time.Clock()
     pygame.mixer.music.load('RPSLife/music/8-bit-game-music.mp3')
     pygame.mixer.music.play(loops=-1, fade_ms=kill_delay * 3000)
-    clock: pygame.time.Clock = pygame.time.Clock()
-    pygame.font.init()
-    width: int = 800
-    height: int = 800
+    
     screen_size: tuple[int, int] = (width, height)
     bg_color: pygame.Color = pygame.Color("darkslategray4")
 
@@ -190,7 +211,7 @@ if __name__ == "__main__":
                     print("Restarting...")
                     frames = 0
                     winner = None
-                    scores: dict = {
+                    scores = {
                         "Scissors": 0, 
                         "Paper": 0, 
                         "Rock": 0, 
@@ -218,9 +239,6 @@ if __name__ == "__main__":
             elif frames <= (frame_rate * kill_delay):
                 screen.blit(i.Image, i.Position)
         if winner:
-            # pygame.mixer.music.unload()
-            # pygame.mixer.music.load('RPSLife/music/8-bit-game-music.mp3')
-            # pygame.mixer.music.play(loops=-1, fade_ms=100)
             screen.blit(winner.Image, winner.Position)
         rock_count.Image = pygame.font.Font.render(rock_count.Font, f"ROCKS: {scores['Rock']}".upper(), True, pygame.Color("crimson"))
         screen.blit(rock_count.Image, rock_count.Position)
@@ -235,3 +253,13 @@ if __name__ == "__main__":
         screen.blit(controls.Image, controls.Position)
         frames += 1
         pygame.display.update()
+
+
+def rps_life() -> None:
+    args = parser.parse_args()
+    main(**vars(args))
+
+
+if __name__ == "__main__":
+    args = parser.parse_args()
+    main(**vars(args))

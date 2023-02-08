@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
-from os import path
+from pathlib import Path
 
-this_directory = path.abspath(path.dirname(__file__))
-with open('README.md') as f:
+this_directory: Path = Path(__file__).parent.absolute()
+read_me = Path("README.md")
+with read_me.open() as f:
     long_description = f.read()
 
 setup(
@@ -32,5 +33,10 @@ setup(
     install_requires=[
         "pygame==2.1.2"
     ], 
-    package_data={'RPSLife': ['images/*.*', 'music/*.mp3']}
+    package_data={'RPSLife': ['images/*.*', 'music/*.mp3']},
+    entry_points={
+        'console_scripts': [
+            'RPSLife = RPSLife.main:rps_life',
+        ],
+    },
 )
