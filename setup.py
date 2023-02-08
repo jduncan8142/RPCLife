@@ -20,7 +20,7 @@ setup(
         "Documentation": "https://github.com/jduncan8142/RPSLife/wiki"
     },
     packages=find_packages(where="RPSLife"),
-    classifiers=(
+    classifiers=[
         "Programming Language :: Python :: 3.10",
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
@@ -28,7 +28,7 @@ setup(
         "Natural Language :: English", 
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Games/Entertainment :: Simulation",
-    ),
+    ],
     python_requires=">=3.10",
     install_requires=[
         "pygame==2.1.2"
